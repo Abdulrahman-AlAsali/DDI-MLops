@@ -1,0 +1,79 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# Flask instance folder
+instance/
+
+# Flask cache files
+*.log
+*.tmp
+
+# Pytest
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Test output
+junit*.xml
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# pyre
+.pyre/
+
+# pytype
+.pytype/
+
+# Profiling data
+profiler.log
+
+# Editor / IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+MANIFEST
+
+# dotenv
+.env
+.env.*
+
+# MacOS
+.DS_Store
+
+# Ignore contents of logs/ and mlruns/ but keep the folders
+logs/*
+!logs/.gitkeep
+
+mlruns/*
+!mlruns/.gitkeep

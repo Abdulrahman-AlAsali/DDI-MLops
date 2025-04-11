@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- TODO: Add a global form submission spinner for the Predict button to improve user feedback. -->
+<!-- TODO: Show validation error messages for feature inputs if left empty or invalid. -->
+
+
+<head>
+    <meta charset="UTF-8">
+    <title>DDI Model Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800 p-6">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">Drug Interaction Prediction</h1>
+
+        <form method="POST" class="mb-6">
+            <div class="mb-4">
+                <label class="block mb-1">Select a Model:</label>
+                <select name="model" class="border rounded px-3 py-2 w-full">
+                    {% for model in models %}
+                    <option value="{{ model }}">{{ model }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Add Drug Selectors Here -->
+            <div class="mb-4 flex space-x-4">
+                <div class="w-1/2">
+                    <label class="block mb-1">Select Drug 1:</label>
+                    <select name="drug1" id="drug1-select" class="border rounded px-3 py-2 w-full">
+                        <option value="" selected>Select Drug</option>
+                        {% for drug in drug_names %}
+                        <option value="{{ drug }}">{{ drug }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="w-1/2">
+                    <label class="block mb-1">Select Drug 2:</label>
+                    <select name="drug2" id="drug2-select" class="border rounded px-3 py-2 w-full">
+                        <option value="" selected>Select Drug</option>
+                        {% for drug in drug_names %}
+                        <option value="{{ drug }}">{{ drug }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+
+            <table class="table-auto w-full border text-left mb-6">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2">Feature</th>
+                        <th class="px-4 py-2">Value</th>
+                        <th class="px-4 py-2">Prediction</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="px-4 py-2">MACCS Score</td>
+                        <td class="px-4 py-2">
+                            <div class="relative">
+                                <input name="MACCS_196" required class="feature-input border rounded w-full px-2"
+                                    value="{{ previous_input.MACCS_196 }}">
+                                <div
+                                    class="input-spinner hidden absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center">
+                                    <div
+                                        class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td rowspan="5" class="px-4 py-2 align-top">
+                            {% if prediction %}
+                            <ul class="list-disc pl-4">
+                                {% for p in prediction %}
+                                <li>{{ p }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <span class="text-gray-500 italic">No prediction yet</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2">RWsim Score</td>
+                        <td class="px-4 py-2">
+                            <div class="relative">
+                                <input name="RWsim_196" required class="feature-input border rounded w-full px-2"
+                                    value="{{ previous_input.RWsim_196 }}">
+                                <div
+                                    class="input-spinner hidden absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center">
+                                    <div
+                                        class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2">Fingerprint Sim</td>
+                        <td class="px-4 py-2">
+                            <div class="relative">
+                                <input name="fingerprint_sim_196" required
+                                    class="feature-input border rounded w-full px-2"
+                                    value="{{ previous_input.fingerprint_sim_196 }}">
+                                <div
+                                    class="input-spinner hidden absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center">
+                                    <div
+                                        class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2">Feat Sim</td>
+                        <td class="px-4 py-2">
+                            <div class="relative">
+                                <input name="feat_sim_196" required class="feature-input border rounded w-full px-2"
+                                    value="{{ previous_input.feat_sim_196 }}">
+                                <div
+                                    class="input-spinner hidden absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center">
+                                    <div
+                                        class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="px-4 py-2">SMILES Sim</td>
+                        <td class="px-4 py-2">
+                            <div class="relative">
+                                <input name="smiles_sim_196" required class="feature-input border rounded w-full px-2"
+                                    value="{{ previous_input.smiles_sim_196 }}">
+                                <div
+                                    class="input-spinner hidden absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center">
+                                    <div
+                                        class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+            <input type="submit" value="Predict"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        </form>
+
+        <!-- Prediction History Table -->
+        {% if prediction_history %}
+        <div class="mt-8">
+            <h2 class="text-xl font-bold mb-2">Previous Predictions</h2>
+            <table class="table-auto w-full border text-sm bg-white shadow">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="px-4 py-2">MACCS</th>
+                        <th class="px-4 py-2">RWsim</th>
+                        <th class="px-4 py-2">Fingerprint</th>
+                        <th class="px-4 py-2">Feat Sim</th>
+                        <th class="px-4 py-2">SMILES</th>
+                        <th class="px-4 py-2">Prediction</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in prediction_history %}
+                    <tr class="border-t">
+                        <td class="px-4 py-2">{{ entry.MACCS_196 }}</td>
+                        <td class="px-4 py-2">{{ entry.RWsim_196 }}</td>
+                        <td class="px-4 py-2">{{ entry.fingerprint_sim_196 }}</td>
+                        <td class="px-4 py-2">{{ entry.feat_sim_196 }}</td>
+                        <td class="px-4 py-2">{{ entry.smiles_sim_196 }}</td>
+                        <td class="px-4 py-2">
+                            <ul class="list-disc pl-4">
+                                {% for p in entry.prediction %}
+                                <li>{{ p }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Combined Action Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mt-8 flex flex-col items-center">
+
+            <!-- Unpause All DAGs Button -->
+            <div class="mb-6 flex flex-col items-center">
+                {% if dags_unpaused %}
+                <button id="pause-all-dags" data-action="pause_all_dags"
+                    class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow">
+                    Pause All DAGs
+                </button>
+                {% else %}
+                <button id="unpause-all-dags" data-action="unpause_all_dags"
+                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow">
+                    Unpause All DAGs
+                </button>
+                {% endif %}
+                <div class="spinner hidden mt-2 animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white">
+                </div>
+            </div>
+
+            <!-- Trigger Buttons Row -->
+            <div class="flex space-x-4">
+                {% for action, label in [('trigger_ingestion', 'Ingestion'), ('trigger_transformation',
+                'Transformation'), ('trigger_training', 'Training')] %}
+                <div class="bg-gray-200 rounded-lg p-4 flex flex-col items-center justify-center">
+                    <button class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded airflow-trigger"
+                        data-action="{{ action }}">
+                        Trigger {{ label }}
+                    </button>
+                    <div
+                        class="spinner hidden mt-2 animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-gray-900">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+
+        <form method="POST" action="/clear-history" class="mt-4">
+            <button type="submit" class="text-sm text-red-600 underline">Clear Prediction History</button>
+        </form>
+
+    </div>
+
+    <script>
+        // TODO: Refactor input disabling/enabling and spinner visibility into reusable utility functions.
+        // TODO: Add ARIA attributes to form elements and buttons for better accessibility.
+        // TODO: Improve responsive layout for small screens using Tailwind's responsive utilities.
+
+        document.querySelector('form').addEventListener('submit', () => {
+            inputs.forEach(input => input.disabled = false);
+        });
+
+        const drug1Select = document.getElementById('drug1-select');
+        const drug2Select = document.getElementById('drug2-select');
+        const inputs = document.querySelectorAll('.feature-input');
+        const spinners = document.querySelectorAll('.input-spinner');
+
+        async function handleDrugSelection() {
+            const drug1 = drug1Select.value;
+            const drug2 = drug2Select.value;
+
+            console.log("Selected Drugs:", drug1, drug2);
+
+            if (drug1 && drug2) {
+                // Disable inputs & show spinners
+                inputs.forEach(input => input.disabled = true);
+                spinners.forEach(spinner => spinner.classList.remove('hidden'));
+
+                try {
+                    const res = await fetch('/mariadb', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ drug1, drug2 })
+                    });
+
+                    const data = await res.json();
+                    console.log(data);
+                    // Fill inputs with returned values
+                    if (data) {
+                        if (data.MACCS_196) document.querySelector('[name="MACCS_196"]').value = data.MACCS_196;
+                        if (data.RWsim_196) document.querySelector('[name="RWsim_196"]').value = data.RWsim_196;
+                        if (data.fingerprint_sim_196) document.querySelector('[name="fingerprint_sim_196"]').value = data.fingerprint_sim_196;
+                        if (data.feat_sim_196) document.querySelector('[name="feat_sim_196"]').value = data.feat_sim_196;
+                        if (data.smiles_sim_196) document.querySelector('[name="smiles_sim_196"]').value = data.smiles_sim_196;
+                    }
+                } catch (error) {
+                    alert("Failed to fetch drug values.");
+                    console.error(error);
+                } finally {
+                    spinners.forEach(spinner => spinner.classList.add('hidden'));
+                }
+            }
+            else {
+                // Enable inputs & hide spinners
+                inputs.forEach(input => input.disabled = false);
+                spinners.forEach(spinner => spinner.classList.add('hidden'));
+            }
+        }
+
+        drug1Select.addEventListener('change', handleDrugSelection);
+        drug2Select.addEventListener('change', handleDrugSelection);
+
+        // Add event listeners to all trigger buttons
+        document.querySelectorAll('.airflow-trigger, #unpause-all-dags, #pause-all-dags').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const action = btn.dataset.action;
+                const spinner = btn.nextElementSibling;
+
+                btn.disabled = true;
+                btn.classList.add("opacity-50");
+                spinner.classList.remove("hidden");
+
+                const res = await fetch('/airflow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action })
+                });
+
+                spinner.classList.add("hidden");
+                btn.classList.remove("opacity-50");
+                btn.disabled = false;
+
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    alert("Failed to perform action: " + action);
+                } else {
+                    alert(data.message || `Action '${action}' completed.`);
+                    if (action === "pause_all_dags" || action === "unpause_all_dags") {
+                        location.reload(); // Reload to get the updated state of dags_unpaused
+                    }
+                }
+            });
+        });
+
+
+
+    </script>
+</body>
+
+</html>

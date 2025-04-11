@@ -1,0 +1,7 @@
+mlflow
+numpy
+flask
+redis
+flask-caching
+pymysql
+sqlalchemy
