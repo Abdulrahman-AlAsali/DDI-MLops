@@ -1,0 +1,5 @@
+apache-airflow-providers-mysql
+pandas
+pymysql
+sqlalchemy
+mlflow

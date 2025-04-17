@@ -1,0 +1,148 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:10.9
+    container_name: airflow_mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: airflow
+      MARIADB_USER: airflow
+      MARIADB_PASSWORD: airflow
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  airflow-init:
+    image: apache/airflow:2.8.1
+    container_name: airflow_init
+    depends_on:
+      - mariadb
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: mysql+mysqldb://airflow:airflow@mariadb:3306/airflow
+      AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./plugins:/opt/airflow/plugins
+      - ./logs:/opt/airflow/logs
+    entrypoint: >
+      bash -c "
+        airflow db upgrade &&
+        airflow users create \
+          --username admin \
+          --firstname Admin \
+          --lastname User \
+          --role Admin \
+          --email admin@example.com \
+          --password admin
+      "
+
+  airflow:
+    build: .
+    container_name: airflow_app
+    restart: always
+    depends_on:
+      - mariadb
+      - airflow-init
+    environment:
+      AIRFLOW__WEBSERVER__SECRET_KEY: JdPeBmS8F-U1ch0QWorMekQBzd59kYI3cte2_ybBZyM
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: mysql+mysqldb://airflow:airflow@mariadb:3306/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_SCHEMA: airflow
+      AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      - ./logs:/opt/airflow/logs
+      - ./dags:/opt/airflow/dags
+      - ./plugins:/opt/airflow/plugins
+      - ./data:/opt/airflow/DDI
+      - ./scripts:/opt/airflow/scripts
+      - ./mlruns:/mlflow/mlruns
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "
+        airflow db init &&
+        airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin &&
+        airflow webserver"
+
+  scheduler:
+    build: .
+    container_name: airflow_scheduler
+    restart: always
+    depends_on:
+      - mariadb
+      - airflow-init
+    environment:
+      AIRFLOW__WEBSERVER__SECRET_KEY: JdPeBmS8F-U1ch0QWorMekQBzd59kYI3cte2_ybBZyM
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: mysql+mysqldb://airflow:airflow@mariadb:3306/airflow
+      AIRFLOW__API__AUTH_BACKEND: airflow.api.auth.backend.basic_auth
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_ARTIFACT_ROOT: /mlflow/mlruns
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+      - ./logs:/opt/airflow/logs
+      - ./dags:/opt/airflow/dags
+      - ./plugins:/opt/airflow/plugins
+      - ./data:/opt/airflow/DDI
+      - ./scripts:/opt/airflow/scripts
+    command: >
+      bash -c "airflow db upgrade && airflow scheduler"
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: mlflow_app
+    restart: always
+    environment:
+      MLFLOW_TRACKING_URI: http://localhost:5000
+      MLFLOW_SERVER_PORT: 5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+    command: >
+      mlflow server
+        --host 0.0.0.0
+        --backend-store-uri sqlite:///mlflow.db
+        --default-artifact-root /mlflow/mlruns
+
+  flask-api:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: flask_api
+    depends_on:
+      - mlflow
+      - redis
+      - airflow
+      - scheduler
+      - mariadb
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_ARTIFACT_ROOT: /mlflow/mlruns
+      FLASK_APP: app.py
+      FLASK_ENV: development
+    ports:
+      - "80:80"
+    volumes:
+      - ./app:/app
+      - ./mlruns:/mlflow/mlruns
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: [ "redis-server", "--save", "", "--appendonly", "no" ]
+    volumes:
+      - ./redisdata:/data
+
+volumes:
+  mariadb_data:
+  redisdata:

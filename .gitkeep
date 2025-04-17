@@ -1,0 +1,3 @@
+touch logs/.gitkeep
+touch mlruns/.gitkeep
+git add logs/.gitkeep mlruns/.gitkeep
