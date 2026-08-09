@@ -1,10 +1,10 @@
 # DDI-MLops
 
-DDI-MLops is a Dockerized MLOps pipeline designed to streamline Drug-Drug interaction machine learning development, deployment, and monitoring. It provides a containerised environment that integrates model training, serving, and experiment tracking using modern MLOps tools.
+DDI-MLops is a Dockerised MLOps pipeline designed to streamline Drug-Drug interaction machine learning development, deployment, and monitoring. It provides a containerised environment that integrates model training, serving, and experiment tracking using modern MLOps tools.
 
 ## 📦 Features
 
-- Dockerized ML pipeline for easy deployment
+- Dockerised ML pipeline for easy deployment
 - Integrated Random Forest Classification model training and inference
 - Scalable and reproducible workflows
 - Integration with experiment tracking tools “MLflow”
@@ -51,7 +51,7 @@ cd DDI-MLops
 docker-compose up
 ```
 
-Now wait till the containers are all up and runnning and the application can be accessed using ports:
+Now wait till the containers are all up and running, then the application can be accessed using ports:
 - `80` for the frontend
 - `8080` for Airflow frontend
 - `5000` for MLflow
